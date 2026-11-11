@@ -1,7 +1,10 @@
 # 20초 감각 실험
 
-[GitHub Pages](https://jeongbin-0509.github.io/time-sense-lab/)
+- [참가자 사이트](https://jeongbin-0509.github.io/time-sense-lab/)
+- [관리자 화면](https://jeongbin-0509.github.io/time-sense-lab/admin.html)
 
-첨부 원본은 [HTML](docs/index.html)과 [Apps Script](apps-script/Code.gs)에 있습니다.
+참가자가 학교·학번·이름을 입력하고 측정을 마치면 결과가 Supabase에 저장됩니다. 관리자는 접속 키로 로그인해 결과를 조회하고 Excel 파일로 내려받을 수 있습니다. 동일 측정의 저장 재시도는 같은 응답 ID를 사용합니다.
 
-스프레드시트에 결과를 저장하려면 대상 시트에 연결된 Apps Script 프로젝트에 `Code.gs`와 HTML 파일 `Index`를 추가하고 웹 앱으로 배포합니다. 참가자는 Apps Script 웹 앱 주소로 접속합니다. GitHub Pages에서는 원본의 `google.script.run` 저장 기능을 사용할 수 없습니다.
+GitHub Pages는 `docs/`를 배포합니다. 데이터베이스 구조와 API 함수는 `supabase/schema.sql`에 있습니다. 접속 키의 SHA-256 해시는 비공개 스키마에 저장하고, 원문 접속 키는 저장소에 추가하지 않습니다. `docs/config.js`에는 참가자 저장 API에 필요한 공개 키만 둡니다.
+
+결과 보관 기간이 끝나면 [Supabase 프로젝트](https://supabase.com/dashboard/project/atvatasprkzurdxzfszo)의 SQL 편집기에서 `experiment_private.responses`의 해당 응답을 삭제합니다. `apps-script/Code.gs`는 첨부 원본 보관용입니다.

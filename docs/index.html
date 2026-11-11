@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
@@ -83,13 +82,16 @@
         <label class="field">학교 이름
           <input type="text" id="school" maxlength="60" autocomplete="organization" placeholder="예: 운정고등학교" required>
         </label>
+        <label class="field">학번
+          <input type="text" id="studentNumber" maxlength="20" inputmode="numeric" placeholder="예: 20101" required>
+        </label>
         <label class="field">이름
           <input type="text" id="studentName" maxlength="40" autocomplete="name" placeholder="본인 이름" required>
         </label>
       </div>
       <label class="consent">
         <input type="checkbox" id="consent">
-        <span>실험 결과 분석과 20.00초 달성자 확인을 위한 <b>학교·이름·측정 기록의 수집 및 이용</b>에 동의합니다. 응답은 연구 담당 조만 확인하며 공개 인포그래프에는 이름과 학교를 표시하지 않습니다. 조사 종료·상품 지급 후 30일 이내에 식별 정보를 삭제합니다. 동의하지 않으면 참여하지 않아도 됩니다.</span>
+        <span>실험 결과 분석과 20.00초 달성자 확인을 위한 <b>학교·학번·이름·측정 기록의 수집 및 이용</b>에 동의합니다. 응답은 연구 담당 조만 확인하며 공개 인포그래프에는 학교, 학번, 이름을 표시하지 않습니다. 조사 종료·상품 지급 후 30일 이내에 식별 정보를 삭제합니다. 동의하지 않으면 참여하지 않아도 됩니다.</span>
       </label>
       <div id="entryError" class="toast" hidden role="alert"></div>
     </div>
@@ -125,7 +127,7 @@
       <div class="result-item"><small>20초와의 오차</small><strong id="resultError">0.00초</strong></div>
     </div>
     <div class="winner" id="winnerNote" hidden>축하합니다! 표시 시간 기준으로 <b>20.00초</b>를 기록했습니다. 상품 지급 여부는 운영진의 최종 확인 후 안내됩니다.</div>
-    <div style="display:flex; justify-content:center; margin-top:14px"><span class="badge">✓ Google 스프레드시트에 저장 완료</span></div>
+    <div style="display:flex; justify-content:center; margin-top:14px"><span class="badge">✓ 결과 저장 완료</span></div>
     <div class="actions"><button type="button" class="secondary" id="nextParticipant">다음 참가자 시작하기</button></div>
   </section>
 
@@ -133,19 +135,19 @@
     <strong>참여 전 확인</strong><br>
     초시계·다른 전자기기를 보거나 주변 사람의 도움을 받지 않고 참여해 주세요. 첫 번째 시도만 인정되며, 20.00초의 기준은 <b>소수 둘째 자리로 반올림한 표시 시간</b>입니다. 버튼을 누르는 지연이나 기기별 차이가 있을 수 있어 실험 기록은 참고용이며, 상품 대상자는 운영진이 별도로 확인합니다.
   </aside>
-  <p class="foot">TIME SENSE LAB · 확률과 통계 인포그래프 수행평가</p>
+  <p class="foot">TIME SENSE LAB · 확률과 통계 인포그래프 수행평가 · <a href="admin.html" style="color:inherit">관리자</a></p>
 </main>
+<script src="config.js"></script>
+<script src="api.js"></script>
 <script>
 (function () {
   'use strict';
-  var STORAGE_KEY = 'time-sense-20s-pending-v1';
   var $ = function(id){ return document.getElementById(id); };
   var phase = 'ready';
   var startedAt = 0;
   var tickHandle = null;
   var payload = null;
   var inFlight = false;
-  var lastResult = null;
 
   function asTime(ms) {
     var totalCentis = Math.round(ms / 10);
@@ -154,9 +156,7 @@
     return '00:' + String(sec).padStart(2,'0') + '.' + String(centis).padStart(2,'0');
   }
   function newId() {
-    if (window.crypto && typeof window.crypto.randomUUID === 'function')
-      return window.crypto.randomUUID().replace(/-/g,'');
-    return 'r' + Date.now() + '_' + Math.random().toString(36).slice(2,14);
+    return window.crypto.randomUUID();
   }
   function errorMessage(el, message) {
     el.textContent = message;
@@ -164,6 +164,7 @@
   }
   function setFieldsLocked(locked) {
     $('school').disabled=locked;
+    $('studentNumber').disabled=locked;
     $('studentName').disabled=locked;
     $('consent').disabled=locked;
   }
@@ -199,6 +200,10 @@
       errorMessage($('entryError'),'학교와 이름을 모두 입력해 주세요.');
       return;
     }
+    if (!/^[0-9]{1,20}$/.test($('studentNumber').value.trim())) {
+      errorMessage($('entryError'), '학번을 숫자로 입력해 주세요.');
+      return;
+    }
     if (!$('consent').checked) {
       errorMessage($('entryError'),'개인정보 수집·이용 동의 후 참여할 수 있습니다.');
       return;
@@ -223,14 +228,13 @@
     cancelAnimationFrame(tickHandle);
     phase = 'saving';
     payload = {
-      id: newId(),
-      name: $('studentName').value.trim(),
-      school: $('school').value.trim(),
-      elapsedMs: elapsedMs,
-      stoppedAt: new Date().toISOString(),
+      response_id: newId(),
+      full_name: $('studentName').value.trim(),
+      school_name: $('school').value.trim(),
+      student_id: $('studentNumber').value.trim(),
+      duration_ms: elapsedMs,
       consent: true
     };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch (e) { /* 저장 불가 시 서버 저장 계속 시도 */ }
     $('timer').textContent = '--:--.--';
     $('timer').classList.add('hidden-time');
     $('timerLabel').textContent = 'MEASUREMENT FINISHED';
@@ -239,36 +243,22 @@
     updateButtons();
     savePending();
   }
-  function savePending() {
+  async function savePending() {
     if (inFlight || !payload) return;
     inFlight = true;
     phase = 'saving';
     updateButtons();
-    errorMessage($('saveError'),'');
-    $('status').textContent = 'Google 스프레드시트에 결과를 저장하고 있습니다.';
-    if (!window.google || !google.script || !google.script.run) {
-      saveFailed('이 파일에서는 서버 저장이 되지 않습니다. Google Apps Script 웹 앱으로 배포한 주소에서 접속해 주세요.');
-      return;
-    }
+    errorMessage($('saveError'), '');
+    $('status').textContent = '결과를 저장하고 있습니다.';
     try {
-      google.script.run
-        .withSuccessHandler(function(result) {
-          inFlight = false;
-          if (!result || result.ok !== true) {
-            saveFailed('서버가 저장 완료를 확인하지 못했습니다.');
-            return;
-          }
-          try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-          lastResult = result;
-          phase = 'saved';
-          showResult(result);
-        })
-        .withFailureHandler(function(err) {
-          saveFailed('저장 오류: ' + ((err && err.message) ? err.message : '통신을 확인해 주세요.') + ' 기존 측정 결과로 다시 저장할 수 있습니다.');
-        })
-        .saveResult(payload);
-    } catch (err) {
-      saveFailed('저장 요청 실패: ' + err.message);
+      var result = await experimentRequest('submit_time_result', payload);
+      if (!result || result.ok !== true) throw new Error('저장 확인 실패');
+      phase = 'saved';
+      showResult(result);
+    } catch (error) {
+      saveFailed('저장을 확인하지 못했습니다. 이 화면에서 같은 기록으로 다시 시도할 수 있습니다.');
+    } finally {
+      inFlight = false;
     }
   }
   function saveFailed(message) {
@@ -282,7 +272,7 @@
     $('experiment').hidden = true;
     $('resultPanel').hidden = false;
     $('resultTitle').textContent = result.winner ? '20.00초! 정확히 맞혔어요' : '참여해 주셔서 감사합니다';
-    $('resultText').textContent = '결과가 Google 스프레드시트에 저장되었습니다. 통계 분석에 사용될 예정입니다.';
+    $('resultText').textContent = '결과가 저장되었습니다. 통계 분석에 사용될 예정입니다.';
     $('resultTime').textContent = Number(result.measuredSeconds).toFixed(2) + '초';
     var e = Number(result.errorSeconds);
     $('resultError').textContent = (e > 0 ? '+' : '') + e.toFixed(2) + '초';
@@ -292,8 +282,8 @@
   function resetNext() {
     phase='ready';
     payload=null;
-    lastResult=null;
     $('school').value='';
+    $('studentNumber').value='';
     $('studentName').value='';
     $('consent').checked=false;
     setFieldsLocked(false);
@@ -314,27 +304,6 @@
   $('retryButton').addEventListener('click', savePending);
   $('nextParticipant').addEventListener('click', resetNext);
 
-  // 저장 오류 후 페이지가 닫혀도, 같은 기기로 재방문하면 미저장 측정을 복원합니다.
-  try {
-    var stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      var recovered = JSON.parse(stored);
-      if (recovered && recovered.id && Number.isInteger(recovered.elapsedMs)) {
-        payload = recovered;
-        $('school').value=recovered.school || '';
-        $('studentName').value=recovered.name || '';
-        $('consent').checked=true;
-        setFieldsLocked(true);
-        phase='error';
-        $('timer').textContent='--:--.--';
-        $('timer').classList.add('hidden-time');
-        $('timerLabel').textContent='UNSAVED RESULT FOUND';
-        $('timerDescription').textContent='이전에 측정한 응답이 아직 저장되지 않았습니다.';
-        $('status').textContent='재측정하지 말고 아래 버튼으로 이전 결과를 저장해 주세요.';
-        errorMessage($('saveError'),'기기에 임시 보관된 결과를 찾았습니다. 「저장 다시 시도」를 눌러 주세요.');
-      }
-    }
-  } catch(e) { /* ignore */ }
   updateButtons();
 })();
 </script>

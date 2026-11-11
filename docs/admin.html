@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>실험 결과 관리 | TIME SENSE LAB</title>
+  <style>
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0d1628; color: #eef4ff; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 1050px; margin: 0 auto; padding: 36px 18px; }
+    a { color: #92efdb; }
+    section, form { background: #182540; border: 1px solid #334462; border-radius: 16px; padding: 20px; }
+    form { max-width: 460px; }
+    input { width: 100%; margin: 8px 0 14px; padding: 10px; background: #0d1628; color: inherit; border: 1px solid #536482; border-radius: 8px; font: inherit; }
+    button { border: 0; border-radius: 8px; padding: 9px 14px; background: #a0efdf; color: #102335; font: inherit; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: default; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    #count { margin-right: auto; }
+    .scroll { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; white-space: nowrap; }
+    th, td { border-bottom: 1px solid #334462; padding: 10px; text-align: left; }
+    #status { min-height: 1.5em; color: #ffdd9d; }
+  </style>
+  <script defer src="config.js"></script>
+  <script defer src="api.js"></script>
+  <script defer src="vendor/xlsx.mini.min.js"></script>
+  <script defer src="admin.js"></script>
+</head>
+<body>
+  <main>
+    <a href="./">← 실험으로 돌아가기</a>
+    <h1>실험 결과 관리</h1>
+    <form id="login">
+      <label for="key">관리자 접속 키</label>
+      <input id="key" type="password" required maxlength="64" autocomplete="current-password" spellcheck="false">
+      <button type="submit" id="signIn">로그인</button>
+    </form>
+    <p id="status" role="status"></p>
+    <section id="dashboard" hidden aria-label="저장된 실험 결과">
+      <div class="toolbar">
+        <strong id="count"></strong>
+        <button type="button" id="refresh">새로고침</button>
+        <button type="button" id="export">엑셀 다운로드</button>
+        <button type="button" id="signOut">로그아웃</button>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>저장 시각 (한국)</th><th>학교</th><th>학번</th><th>이름</th><th>측정 시간 (초)</th><th>20초와의 오차 (초)</th><th>20.00초 달성</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

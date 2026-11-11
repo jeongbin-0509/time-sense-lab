@@ -112,7 +112,7 @@
       <button type="button" class="primary" id="startButton">실험 시작</button>
       <button type="button" class="stop" id="stopButton" disabled>정지</button>
     </div>
-    <div class="status" id="status" role="status">20.00초를 정확히 기록하면 소정의 상품 후보가 됩니다. (1인 1회 참여)</div>
+    <div class="status" id="status" role="status">첫 측정에서 20.00초를 기록하면 상품 후보가 됩니다.</div>
     <div class="toast" id="saveError" hidden role="alert"></div>
     <div class="actions" id="retryActions" hidden>
       <button type="button" class="secondary" id="retryButton">저장 다시 시도</button>
@@ -126,14 +126,17 @@
       <div class="result-item"><small>내가 멈춘 시간</small><strong id="resultTime">0.00초</strong></div>
       <div class="result-item"><small>20초와의 오차</small><strong id="resultError">0.00초</strong></div>
     </div>
-    <div class="winner" id="winnerNote" hidden>축하합니다! 표시 시간 기준으로 <b>20.00초</b>를 기록했습니다. 상품 지급 여부는 운영진의 최종 확인 후 안내됩니다.</div>
+    <div class="winner" id="winnerNote" hidden>축하합니다! 표시 시간 기준으로 <b>20.00초</b>를 기록했습니다. 상품은 첫 번째 기록을 기준으로 운영진이 확인합니다.</div>
     <div style="display:flex; justify-content:center; margin-top:14px"><span class="badge">✓ 결과 저장 완료</span></div>
-    <div class="actions"><button type="button" class="secondary" id="nextParticipant">다음 참가자 시작하기</button></div>
+    <div class="actions">
+      <button type="button" class="primary" id="measureAgain">다시 하기</button>
+      <button type="button" class="secondary" id="exitExperiment">나가기</button>
+    </div>
   </section>
 
   <aside class="note">
     <strong>참여 전 확인</strong><br>
-    초시계·다른 전자기기를 보거나 주변 사람의 도움을 받지 않고 참여해 주세요. 첫 번째 시도만 인정되며, 20.00초의 기준은 <b>소수 둘째 자리로 반올림한 표시 시간</b>입니다. 버튼을 누르는 지연이나 기기별 차이가 있을 수 있어 실험 기록은 참고용이며, 상품 대상자는 운영진이 별도로 확인합니다.
+    초시계·다른 전자기기를 보거나 주변 사람의 도움을 받지 않고 참여해 주세요. 모든 측정 기록은 저장되며, 상품은 첫 번째 기록을 기준으로 합니다. 20.00초의 기준은 <b>소수 둘째 자리로 반올림한 표시 시간</b>입니다. 버튼을 누르는 지연이나 기기별 차이가 있을 수 있어 실험 기록은 참고용이며, 상품 대상자는 운영진이 별도로 확인합니다.
   </aside>
   <p class="foot">TIME SENSE LAB · 확률과 통계 인포그래프 수행평가 · <a href="admin.html" style="color:inherit">관리자</a></p>
 </main>
@@ -279,7 +282,17 @@
     $('winnerNote').hidden = !result.winner;
     window.scrollTo({top:0,behavior:'smooth'});
   }
-  function resetNext() {
+  function measureAgain() {
+    if (phase !== 'saved') return;
+    payload = null;
+    phase = 'ready';
+    $('resultPanel').hidden = true;
+    $('experiment').hidden = false;
+    startExperiment();
+    $('stopButton').focus({preventScroll:true});
+    $('timer').scrollIntoView({block:'center'});
+  }
+  function exitExperiment() {
     phase='ready';
     payload=null;
     $('school').value='';
@@ -293,7 +306,7 @@
     $('timer').classList.remove('hidden-time');
     $('timerLabel').textContent='READY TO START';
     $('timerDescription').textContent='준비가 됐다면 아래 시작 버튼을 눌러 주세요.';
-    $('status').textContent='20.00초를 정확히 기록하면 소정의 상품 후보가 됩니다. (1인 1회 참여)';
+    $('status').textContent='첫 측정에서 20.00초를 기록하면 상품 후보가 됩니다.';
     errorMessage($('entryError'),'');
     errorMessage($('saveError'),'');
     updateButtons();
@@ -302,7 +315,8 @@
   $('startButton').addEventListener('click', startExperiment);
   $('stopButton').addEventListener('click', stopExperiment);
   $('retryButton').addEventListener('click', savePending);
-  $('nextParticipant').addEventListener('click', resetNext);
+  $('measureAgain').addEventListener('click', measureAgain);
+  $('exitExperiment').addEventListener('click', exitExperiment);
 
   updateButtons();
 })();

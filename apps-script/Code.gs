@@ -11,29 +11,13 @@ const HEADERS = [
 ];
 
 function doGet() {
-  return json_({ok: true});
-}
-
-function doPost(e) {
-  try {
-    const raw = e && e.postData && e.postData.contents;
-    if (!raw || raw.length > 4096) return json_({ok: false});
-    return json_(saveResult(JSON.parse(raw)));
-  } catch (error) {
-    return json_({ok: false});
-  }
-}
-
-function json_(value) {
-  return ContentService.createTextOutput(JSON.stringify(value))
-    .setMimeType(ContentService.MimeType.JSON);
+  return HtmlService.createHtmlOutputFromFile('Index')
+    .setTitle('20초 감각 실험 | TIME SENSE LAB')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
 /** 처음 한번 실행하면 저장용 시트를 만들고 헤더를 생성합니다. */
 function setupSheet() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  if (!spreadsheet) throw new Error('저장할 스프레드시트에서 Apps Script를 열어 주세요.');
-  PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', spreadsheet.getId());
   const sheet = getOrCreateSheet_();
   return '완료! 데이터가 저장될 시트: ' + sheet.getName();
 }
@@ -57,6 +41,7 @@ function saveResult(data) {
     throw new Error('측정 시간 값이 유효하지 않습니다.');
   }
 
+  const exactSec = elapsedMs / 1000;
   const shownSec = Math.round(elapsedMs / 10) / 100; // 소수 둘째 자리로 반올림
   const signedError = Math.round((shownSec - 20) * 100) / 100;
   const absoluteError = Math.abs(signedError);
@@ -108,9 +93,10 @@ function saveResult(data) {
 }
 
 function getOrCreateSheet_() {
-  const id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
-  if (!id) throw new Error('먼저 편집기에서 setupSheet를 실행해 주세요.');
-  const ss = SpreadsheetApp.openById(id);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+    throw new Error('Google 스프레드시트에 연결된 Apps Script에서 실행해 주세요.');
+  }
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
   if (sheet.getLastRow() === 0) {

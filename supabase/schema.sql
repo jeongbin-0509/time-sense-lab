@@ -60,7 +60,7 @@ returns jsonb
 language plpgsql security definer set search_path = ''
 as $$
 begin
-  if access_key is null or access_key !~ '^[a-f0-9]{64}$'
+  if access_key is null or char_length(access_key) not between 12 and 64
      or not exists (
        select 1 from experiment_private.admin_key
        where key_hash = encode(sha256(convert_to(access_key, 'UTF8')), 'hex')

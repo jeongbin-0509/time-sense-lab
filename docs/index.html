@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <title>20초 감각 실험 | TIME SENSE LAB</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --surface:#141c30; --surface2:#1b2640; --border:#33405a; --ink:#f1f5ff; --muted:#a7b3c9; --mint:#75efc7; --blue:#7eacff; --warn:#ffbd75; --red:#ff8585; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif; background:radial-gradient(circle at 50% 0%, #1c2b4b 0%, #0b1020 43%, #0b1020 100%); color:var(--ink); }
+    .wrap { max-width:670px; padding:33px 20px 68px; margin:0 auto; }
+    .header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:36px; }
+    .brand { display:flex; align-items:center; gap:9px; color:var(--ink); font-weight:800; letter-spacing:1.2px; font-size:13px; }
+    .brand-mark { background:var(--mint); color:#142738; display:grid; place-items:center; width:31px; height:31px; border-radius:10px; font-size:14px; letter-spacing:-.8px; }
+    .header-note { font-size:12px; border:1px solid #3d5673; border-radius:999px; color:var(--blue); padding:7px 11px; white-space:nowrap; }
+    .intro { margin-bottom:23px; }
+    .eyebrow { color:var(--mint); font-size:12px; letter-spacing:2px; font-weight:800; }
+    h1 { font-size:clamp(28px, 7vw, 42px); line-height:1.27; letter-spacing:-1.7px; margin:12px 0 14px; }
+    h1 span { color:var(--mint); }
+    .sub { color:var(--muted); font-size:15px; line-height:1.85; margin:0; word-break:keep-all; }
+    .panel { background:rgba(20,28,48,.95); border:1px solid var(--border); border-radius:23px; box-shadow:0 22px 75px rgba(0,0,0,.20); padding:clamp(20px,5vw,32px); margin-bottom:19px; }
+    .panel-heading { display:flex; align-items:center; gap:9px; margin:0 0 20px; font-size:15px; font-weight:800; }
+    .number { background:var(--surface2); color:var(--mint); border-radius:50%; width:28px; height:28px; display:grid; place-items:center; font-size:12px; }
+    .fields { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+    label.field { display:flex; flex-direction:column; gap:9px; font-size:13px; font-weight:700; color:#dce6f8; }
+    input[type=text] { width:100%; background:#0d1528; border:1px solid #3d4d69; border-radius:12px; padding:14px 14px; outline:none; color:var(--ink); font-size:15px; font-family:inherit; }
+    input[type=text]::placeholder { color:#687893; }
+    input[type=text]:focus { border-color:var(--mint); box-shadow:0 0 0 3px rgba(117,239,199,.10); }
+    .consent { display:flex; gap:10px; align-items:flex-start; color:var(--muted); font-size:12px; line-height:1.7; margin-top:18px; cursor:pointer; }
+    input[type=checkbox] { flex:none; width:17px; height:17px; margin-top:2px; accent-color:var(--mint); }
+    .timer-panel { text-align:center; padding:29px 19px 26px; border:1px solid #3c4c68; background:linear-gradient(155deg, #182843 0%, #111b30 100%); border-radius:19px; }
+    .timer-label { color:var(--blue); font-size:11px; letter-spacing:2px; font-weight:800; }
+    .timer { font-variant-numeric:tabular-nums; font-feature-settings:'tnum'; font-size:clamp(58px, 12vw, 82px); letter-spacing:-2.5px; font-weight:850; line-height:1.35; margin:12px 0 2px; }
+    .timer.hidden-time { color:var(--mint); letter-spacing:5px; }
+    .timer-desc { color:var(--muted); font-size:13px; line-height:1.8; min-height:25px; }
+    .rules { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:17px 0 22px; text-align:center; }
+    .rule { background:rgba(255,255,255,.035); border:1px solid #2b3850; border-radius:13px; padding:12px 6px; }
+    .rule b { display:block; font-size:15px; color:#dce9ff; padding-bottom:5px; }
+    .rule small { color:var(--muted); font-size:11px; }
+    .actions { display:flex; gap:11px; margin-top:16px; }
+    button { appearance:none; border:0; cursor:pointer; border-radius:13px; font:inherit; font-weight:800; padding:16px 18px; transition:transform .12s, opacity .12s; }
+    button:active:not(:disabled) { transform:scale(.98); }
+    button:disabled { opacity:.40; cursor:not-allowed; }
+    .primary { background:var(--mint); color:#0d2a26; flex:1; font-size:16px; }
+    .stop { background:#ff8c86; color:#401d23; flex:1; font-size:16px; }
+    .secondary { color:var(--ink); background:#293854; flex:1; }
+    .status { color:var(--muted); font-size:12px; line-height:1.7; margin:14px 0 0; min-height:22px; }
+    .note { padding:18px 20px; background:#11192b; border:1px solid #26344d; border-radius:17px; color:var(--muted); font-size:12px; line-height:1.9; }
+    .note strong { color:#dce6fa; }
+    .toast { padding:11px 14px; background:#49272e; border:1px solid #c1646c; color:#ffe4e4; border-radius:12px; margin-top:14px; font-size:13px; line-height:1.6; }
+    .success-heading { text-align:center; font-size:23px; font-weight:850; margin:0 0 11px; }
+    .success-sub { color:var(--muted); text-align:center; font-size:14px; line-height:1.8; margin:0 0 22px; }
+    .result-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin:18px 0; }
+    .result-item { background:#0d1528; border-radius:13px; padding:17px 12px; text-align:center; }
+    .result-item small { display:block; color:var(--muted); font-size:12px; margin-bottom:7px; }
+    .result-item strong { color:var(--mint); font-size:26px; font-variant-numeric:tabular-nums; }
+    .winner { background:rgba(117,239,199,.08); border:1px solid rgba(117,239,199,.42); border-radius:14px; color:#b7ffe7; padding:13px; font-size:13px; line-height:1.7; margin:13px 0; }
+    .badge { display:inline-block; padding:5px 9px; border-radius:999px; background:#223b37; font-size:11px; font-weight:700; color:var(--mint); }
+    .foot { color:#687c9f; font-size:11px; text-align:center; margin-top:26px; }
+    [hidden] { display:none !important; }
+    @media(max-width:450px) { .fields{grid-template-columns:1fr;} .wrap{padding:23px 15px 48px;} .header{margin-bottom:28px;} .rules{gap:6px;} .rule{padding:10px 3px;} .rule b{font-size:13px;} }
+    @media(prefers-reduced-motion:reduce){ *{transition:none !important;} }
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="header">
+    <div class="brand"><div class="brand-mark">20s</div> TIME SENSE LAB</div>
+    <div class="header-note">확률과 통계 · 시간 감각 실험</div>
+  </header>
+  <div class="intro">
+    <div class="eyebrow">20-SECOND CHALLENGE</div>
+    <h1>당신의 <span>20초</span>는<br>얼마나 정확할까요?</h1>
+    <p class="sub">5초까지만 시계가 보여요. 그다음부터는 오직 자신의 시간 감각을 믿고, 20초가 되었다고 느끼는 순간 <b>정지</b>를 눌러 주세요.</p>
+  </div>
+
+  <section class="panel" id="experiment">
+    <div id="entry">
+      <h2 class="panel-heading"><span class="number">01</span> 실험 참가자 정보</h2>
+      <div class="fields">
+        <label class="field">학교 이름
+          <input type="text" id="school" maxlength="60" autocomplete="organization" placeholder="예: 운정고등학교" required>
+        </label>
+        <label class="field">이름
+          <input type="text" id="studentName" maxlength="40" autocomplete="name" placeholder="본인 이름" required>
+        </label>
+      </div>
+      <label class="consent">
+        <input type="checkbox" id="consent">
+        <span>실험 결과 분석과 20.00초 달성자 확인을 위한 <b>학교·이름·측정 기록의 수집 및 이용</b>에 동의합니다. 응답은 연구 담당 조만 확인하며 공개 인포그래프에는 이름과 학교를 표시하지 않습니다. 조사 종료·상품 지급 후 30일 이내에 식별 정보를 삭제합니다. 동의하지 않으면 참여하지 않아도 됩니다.</span>
+      </label>
+      <div id="entryError" class="toast" hidden role="alert"></div>
+    </div>
+
+    <div style="height:24px"></div>
+    <h2 class="panel-heading"><span class="number">02</span> 시간 감각 측정</h2>
+    <div class="timer-panel">
+      <div class="timer-label" id="timerLabel">READY TO START</div>
+      <div class="timer" id="timer" aria-live="off">00:00.00</div>
+      <div class="timer-desc" id="timerDescription">준비가 됐다면 아래 시작 버튼을 눌러 주세요.</div>
+    </div>
+    <div class="rules">
+      <div class="rule"><b>0~5초</b><small>시간 표시</small></div>
+      <div class="rule"><b>5초 이후</b><small>시간 숨김</small></div>
+      <div class="rule"><b>20초 예상</b><small>정지 누르기</small></div>
+    </div>
+    <div class="actions" id="experimentActions">
+      <button type="button" class="primary" id="startButton">실험 시작</button>
+      <button type="button" class="stop" id="stopButton" disabled>정지</button>
+    </div>
+    <div class="status" id="status" role="status">20.00초를 정확히 기록하면 소정의 상품 후보가 됩니다. (1인 1회 참여)</div>
+    <div class="toast" id="saveError" hidden role="alert"></div>
+    <div class="actions" id="retryActions" hidden>
+      <button type="button" class="secondary" id="retryButton">저장 다시 시도</button>
+    </div>
+  </section>
+
+  <section class="panel" id="resultPanel" hidden>
+    <div class="success-heading" id="resultTitle">측정 완료</div>
+    <p class="success-sub" id="resultText">실험 결과가 안전하게 저장되었습니다.</p>
+    <div class="result-grid">
+      <div class="result-item"><small>내가 멈춘 시간</small><strong id="resultTime">0.00초</strong></div>
+      <div class="result-item"><small>20초와의 오차</small><strong id="resultError">0.00초</strong></div>
+    </div>
+    <div class="winner" id="winnerNote" hidden>축하합니다! 표시 시간 기준으로 <b>20.00초</b>를 기록했습니다. 상품 지급 여부는 운영진의 최종 확인 후 안내됩니다.</div>
+    <div style="display:flex; justify-content:center; margin-top:14px"><span class="badge" id="savedBadge">✓ Google 스프레드시트에 저장 완료</span></div>
+    <div class="actions"><button type="button" class="secondary" id="nextParticipant">다음 참가자 시작하기</button></div>
+  </section>
+
+  <aside class="note">
+    <strong>참여 전 확인</strong><br>
+    초시계·다른 전자기기를 보거나 주변 사람의 도움을 받지 않고 참여해 주세요. 첫 번째 시도만 인정되며, 20.00초의 기준은 <b>소수 둘째 자리로 반올림한 표시 시간</b>입니다. 버튼을 누르는 지연이나 기기별 차이가 있을 수 있어 실험 기록은 참고용입니다. <span id="prizeRule">상품 대상자는 운영진이 별도로 확인합니다.</span>
+  </aside>
+  <p class="foot">TIME SENSE LAB · 확률과 통계 인포그래프 수행평가</p>
+</main>
+<script src="config.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  var phase = 'ready';
+  var startedAt = 0;
+  var tickHandle = null;
+  var payload = null;
+  var inFlight = false;
+  var endpoint = window.TIME_SENSE_SAVE_URL || '';
+  var isLive = /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(endpoint);
+  var normalStatus = $('status').textContent;
+  var readyStatus = isLive ? normalStatus : '체험 모드 · 시간만 측정하며 결과는 전송하거나 저장하지 않습니다.';
+  if (!isLive) {
+    $('prizeRule').hidden = true;
+    $('entry').hidden = true;
+    $('winnerNote').textContent = '축하합니다! 표시 시간 기준으로 20.00초를 기록했습니다.';
+  }
+  $('status').textContent = readyStatus;
+
+  function asTime(ms) {
+    var totalCentis = Math.round(ms / 10);
+    var sec = Math.floor(totalCentis / 100);
+    var centis = totalCentis % 100;
+    return '00:' + String(sec).padStart(2,'0') + '.' + String(centis).padStart(2,'0');
+  }
+  function newId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function')
+      return window.crypto.randomUUID().replace(/-/g,'');
+    return 'r' + Date.now() + '_' + Math.random().toString(36).slice(2,14);
+  }
+  function errorMessage(el, message) {
+    el.textContent = message;
+    el.hidden = !message;
+  }
+  function setFieldsLocked(locked) {
+    $('school').disabled=locked;
+    $('studentName').disabled=locked;
+    $('consent').disabled=locked;
+  }
+  function updateButtons() {
+    $('startButton').disabled = phase !== 'ready';
+    $('stopButton').disabled = phase !== 'running';
+    $('startButton').textContent = phase === 'ready' ? '실험 시작' : (phase === 'running' ? '측정 중' : '실험 종료');
+    $('retryActions').hidden = phase !== 'error';
+  }
+  function updateClock() {
+    if (phase !== 'running') return;
+    var ms = performance.now() - startedAt;
+    if (ms < 5000) {
+      $('timer').textContent = asTime(ms);
+    } else if (!$('timer').classList.contains('hidden-time')) {
+      $('timer').textContent = '--:--.--';
+      $('timer').classList.add('hidden-time');
+      $('timerLabel').textContent = 'TRUST YOUR SENSE';
+      $('timerDescription').textContent = '시간은 숨겨졌어요. 20초가 됐다고 생각하면 정지를 누르세요.';
+    }
+    // 실험 종료가 지연되어도 기록이 무한히 커지지 않도록 제한
+    if (ms >= 180000) {
+      stopExperiment();
+      return;
+    }
+    tickHandle = requestAnimationFrame(updateClock);
+  }
+  function startExperiment() {
+    if (phase !== 'ready') return;
+    var school = $('school').value.trim();
+    var name = $('studentName').value.trim();
+    if (isLive && (!school || !name)) {
+      errorMessage($('entryError'),'학교와 이름을 모두 입력해 주세요.');
+      return;
+    }
+    if (isLive && !$('consent').checked) {
+      errorMessage($('entryError'),'개인정보 수집·이용 동의 후 참여할 수 있습니다.');
+      return;
+    }
+    errorMessage($('entryError'),'');
+    errorMessage($('saveError'),'');
+    setFieldsLocked(true);
+    phase = 'running';
+    $('timer').textContent = '00:00.00';
+    $('timer').classList.remove('hidden-time');
+    $('timerLabel').textContent = 'TIME IS RUNNING';
+    $('timerDescription').textContent = '처음 5초 동안 시간의 흐름을 확인하세요.';
+    $('status').textContent = '20초가 지났다고 느끼면 정지 버튼을 누르세요.';
+    updateButtons();
+    startedAt = performance.now();
+    tickHandle = requestAnimationFrame(updateClock);
+  }
+  function stopExperiment() {
+    if (phase !== 'running') return;
+    // 정지 이벤트가 발생한 시점에서 즉시 단조 시계를 읽음
+    var elapsedMs = Math.max(1, Math.min(180000, Math.round(performance.now() - startedAt)));
+    cancelAnimationFrame(tickHandle);
+    if (!isLive) {
+      var seconds = Math.round(elapsedMs / 10) / 100;
+      phase = 'saved';
+      showResult({ measuredSeconds: seconds, errorSeconds: Math.round((seconds - 20) * 100) / 100, winner: seconds === 20 });
+      return;
+    }
+    phase = 'saving';
+    payload = {
+      id: newId(),
+      name: $('studentName').value.trim(),
+      school: $('school').value.trim(),
+      elapsedMs: elapsedMs,
+      stoppedAt: new Date().toISOString(),
+      consent: true
+    };
+    $('timer').textContent = '--:--.--';
+    $('timer').classList.add('hidden-time');
+    $('timerLabel').textContent = 'MEASUREMENT FINISHED';
+    $('timerDescription').textContent = '측정이 끝났습니다. 결과를 서버에 저장 중입니다.';
+    $('status').textContent = '저장 확인 중입니다. 완료 메시지가 나타날 때까지 페이지를 닫지 마세요.';
+    updateButtons();
+    savePending();
+  }
+  async function savePending() {
+    if (inFlight || !payload) return;
+    inFlight = true;
+    phase = 'saving';
+    updateButtons();
+    errorMessage($('saveError'),'');
+    $('status').textContent = 'Google 스프레드시트에 결과를 저장하고 있습니다.';
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 45000);
+    try {
+      var response = await fetch(endpoint, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit',
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error('서버에 연결할 수 없습니다.');
+      var result = await response.json();
+      if (!result || result.ok !== true || result.responseId !== payload.id) {
+        throw new Error('서버에서 저장을 확인하지 못했습니다.');
+      }
+      phase = 'saved';
+      showResult(result);
+    } catch (err) {
+      saveFailed('저장을 확인하지 못했습니다. 같은 측정 결과로 다시 시도할 수 있습니다.');
+    } finally {
+      clearTimeout(timeout);
+      inFlight = false;
+    }
+  }
+
+  function saveFailed(message) {
+    inFlight = false;
+    phase = 'error';
+    $('status').textContent = '저장되지 않았습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';
+    errorMessage($('saveError'),message);
+    updateButtons();
+  }
+  function showResult(result) {
+    $('experiment').hidden = true;
+    $('resultPanel').hidden = false;
+    $('resultTitle').textContent = result.winner ? '20.00초! 정확히 맞혔어요' : '참여해 주셔서 감사합니다';
+    $('resultText').textContent = isLive ? '결과가 Google 스프레드시트에 저장되었습니다. 통계 분석에 사용될 예정입니다.' : '체험 결과는 저장되지 않습니다.';
+    $('savedBadge').parentElement.hidden = !isLive;
+    $('resultTime').textContent = Number(result.measuredSeconds).toFixed(2) + '초';
+    var e = Number(result.errorSeconds);
+    $('resultError').textContent = (e > 0 ? '+' : '') + e.toFixed(2) + '초';
+    $('winnerNote').hidden = !result.winner;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function resetNext() {
+    phase='ready';
+    payload=null;
+    $('school').value='';
+    $('studentName').value='';
+    $('consent').checked=false;
+    setFieldsLocked(false);
+    $('experiment').hidden=false;
+    $('resultPanel').hidden=true;
+    $('timer').textContent='00:00.00';
+    $('timer').classList.remove('hidden-time');
+    $('timerLabel').textContent='READY TO START';
+    $('timerDescription').textContent='준비가 됐다면 아래 시작 버튼을 눌러 주세요.';
+    $('status').textContent=readyStatus;
+    errorMessage($('entryError'),'');
+    errorMessage($('saveError'),'');
+    updateButtons();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  $('startButton').addEventListener('click', startExperiment);
+  $('stopButton').addEventListener('click', stopExperiment);
+  $('retryButton').addEventListener('click', savePending);
+  $('nextParticipant').addEventListener('click', resetNext);
+
+  updateButtons();
+})();
+</script>
+</body>
+</html>

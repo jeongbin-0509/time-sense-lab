@@ -15,6 +15,7 @@
     form { max-width: 460px; }
     input { width: 100%; margin: 8px 0 14px; padding: 10px; background: #0d1628; color: inherit; border: 1px solid #536482; border-radius: 8px; font: inherit; }
     button { border: 0; border-radius: 8px; padding: 9px 14px; background: #a0efdf; color: #102335; font: inherit; font-weight: 700; cursor: pointer; }
+    .delete-record { background: #ffd6d6; color: #671820; }
     button:disabled { opacity: .5; cursor: default; }
     .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     #count { margin-right: auto; }
@@ -26,7 +27,7 @@
   <script defer src="config.js"></script>
   <script defer src="api.js"></script>
   <script defer src="vendor/xlsx.mini.min.js"></script>
-  <script defer src="admin.js"></script>
+  <script defer src="admin.js?v=delete"></script>
 </head>
 <body>
   <main>
@@ -47,7 +48,7 @@
       </div>
       <div class="scroll">
         <table>
-          <thead><tr><th>저장 시각 (한국)</th><th>학교</th><th>학번</th><th>이름</th><th>측정 시간 (초)</th><th>20초와의 오차 (초)</th><th>20.00초 달성</th></tr></thead>
+          <thead><tr><th>저장 시각 (한국)</th><th>학교</th><th>학번</th><th>이름</th><th>측정 시간 (초)</th><th>20초와의 오차 (초)</th><th>20.00초 달성</th><th>관리</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
       </div>

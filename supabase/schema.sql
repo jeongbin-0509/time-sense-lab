@@ -55,9 +55,9 @@ begin
 end;
 $$;
 
-create or replace function public.list_time_results(access_key text)
-returns jsonb
-language plpgsql security definer set search_path = ''
+create or replace function experiment_private.require_admin(access_key text)
+returns void
+language plpgsql set search_path = ''
 as $$
 begin
   if access_key is null or char_length(access_key) not between 12 and 64
@@ -67,10 +67,34 @@ begin
      ) then
     raise sqlstate 'PT403' using message = 'invalid_admin_key';
   end if;
+end;
+$$;
+
+create or replace function public.list_time_results(access_key text)
+returns jsonb
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  perform experiment_private.require_admin(access_key);
   return (select coalesce(jsonb_agg(to_jsonb(r) order by r.saved_at desc, r.id), '[]'::jsonb)
           from experiment_private.responses as r);
 end;
 $$;
+
+create or replace function public.delete_time_result(access_key text, response_id uuid)
+returns jsonb
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  perform experiment_private.require_admin(access_key);
+  delete from experiment_private.responses where id = response_id;
+  return jsonb_build_object('ok', true);
+end;
+$$;
+
+revoke all on function experiment_private.require_admin(text) from public, anon, authenticated;
+revoke all on function public.delete_time_result(text,uuid) from public, anon, authenticated;
+grant execute on function public.delete_time_result(text,uuid) to anon;
 
 revoke all on function public.submit_time_result(uuid,text,text,text,integer,boolean) from public, anon, authenticated;
 revoke all on function public.list_time_results(text) from public, anon, authenticated;

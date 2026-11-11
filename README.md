@@ -7,4 +7,4 @@
 
 GitHub Pages는 `docs/`를 배포합니다. 데이터베이스 구조와 API 함수는 `supabase/schema.sql`에 있습니다. 접속 키의 SHA-256 해시는 비공개 스키마에 저장하고, 원문 접속 키는 저장소에 추가하지 않습니다. `docs/config.js`에는 참가자 저장 API에 필요한 공개 키만 둡니다.
 
-결과 보관 기간이 끝나면 [Supabase 프로젝트](https://supabase.com/dashboard/project/atvatasprkzurdxzfszo)의 SQL 편집기에서 `experiment_private.responses`의 해당 응답을 삭제합니다. `apps-script/Code.gs`는 첨부 원본 보관용입니다.
+관리자 화면에서 각 측정 기록의 **삭제** 버튼으로 해당 기록을 삭제할 수 있습니다. `apps-script/Code.gs`는 첨부 원본 보관용입니다.

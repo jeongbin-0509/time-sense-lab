@@ -8,6 +8,7 @@ const headings = ['저장 시각 (한국)', '학교', '학번', '이름', '측�
 let accessKey = '';
 let records = [];
 let requestNumber = 0;
+let deleting = false;
 
 function formatRecord(record) {
   const centiseconds = Math.round(record.elapsed_ms / 10);
@@ -25,6 +26,13 @@ function render() {
     formatRecord(record).forEach((value, index) => {
       row.insertCell().textContent = index === 4 || index === 5 ? value.toFixed(2) : value;
     });
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'delete-record';
+    button.textContent = '삭제';
+    button.setAttribute('aria-label', record.student_name + ' 측정 기록 삭제');
+    button.addEventListener('click', () => deleteRecord(record));
+    row.insertCell().appendChild(button);
     body.appendChild(row);
   }
   byId('rows').replaceChildren(body);
@@ -34,6 +42,7 @@ function render() {
 
 function signOut() {
   requestNumber++;
+  deleting = false;
   accessKey = '';
   records = [];
   render();
@@ -46,6 +55,7 @@ function signOut() {
 }
 
 async function loadResults(key) {
+  if (deleting) return;
   const current = ++requestNumber;
   byId('signIn').disabled = true;
   byId('refresh').disabled = true;
@@ -71,6 +81,42 @@ async function loadResults(key) {
   } finally {
     if (current === requestNumber) {
       byId('signIn').disabled = false;
+      byId('refresh').disabled = false;
+    }
+  }
+}
+
+async function deleteRecord(record) {
+  if (!accessKey || deleting || byId('refresh').disabled) return;
+  const [savedAt, school, studentNumber, name, seconds] = formatRecord(record);
+  if (!window.confirm(`${school} ${studentNumber} ${name} · ${seconds.toFixed(2)}초
+${savedAt}
+이 측정 기록을 삭제할까요?`)) return;
+
+  const current = ++requestNumber;
+  deleting = true;
+  byId('refresh').disabled = true;
+  byId('status').textContent = '기록을 삭제하는 중입니다.';
+  try {
+    const result = await experimentRequest('delete_time_result', {
+      access_key: accessKey, response_id: record.id
+    });
+    if (current !== requestNumber) return;
+    if (result?.ok !== true) throw new Error('삭제 확인 실패');
+    records = records.filter(row => row.id !== record.id);
+    render();
+    byId('status').textContent = '선택한 측정 기록을 삭제했습니다.';
+  } catch (error) {
+    if (current !== requestNumber) return;
+    if (error.status === 403) {
+      signOut();
+      byId('status').textContent = '관리자 접속 키를 확인해 주세요.';
+      return;
+    }
+    byId('status').textContent = '삭제를 확인하지 못했습니다. 새로고침하거나 다시 시도해 주세요.';
+  } finally {
+    if (current === requestNumber) {
+      deleting = false;
       byId('refresh').disabled = false;
     }
   }
